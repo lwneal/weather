@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+import os
+import requests
+from datetime import datetime
+
+URL_PREFIX = 'https://www.nrlmry.navy.mil/htdocs_dyn_server/PUBLIC/nexsat/thumbs/full_size/NorthAmerica-CONUS-x/x-x-x/vis_ir_background/goes/'
+URL_SUFFIX = '.goes_15.visir.bckgr.NorthAmerica-CONUS-x_x-x-x.DAYNGT.jpg'
+URL_SPLIT = '/PUBLIC/nexsat/thumbs/region_size/NorthAmerica-x-x/x-x-x/vis_ir_background/goes/'
+GET_LATEST_URL = 'https://www.nrlmry.navy.mil/nexsat-bin/nexsat.cgi?BASIN=CONUS&SUB_BASIN=focus_regions&START=1&CCA=NorthAmerica-x-x&AGE=Latest&SIZE=Thumb&PRODUCT=vis_ir_background&SUB_PRODUCT=goes&DISPLAY=Single&ARROW=prev&SSC=x-x-x&PATH=NorthAmerica-x-x/x-x-x/vis_ir_background/goes&&buttonPressed=Latest'
+
+
+def get_frame(year, month, date, time):
+    date_code = '{:04d}{:02d}{:02d}.{:04d}'.format(year, month, date, time)
+    url = URL_PREFIX + date_code + URL_SUFFIX
+    print(url)
+    data = requests.get(url)
+    return data.content
+
+
+def get_latest_frame():
+    front_page_html = requests.get(GET_LATEST_URL).text
+    latest_url_key = front_page_html.partition(URL_SPLIT)[2][:13]
+    url = URL_PREFIX + latest_url_key + URL_SUFFIX
+    print(url)
+    data = requests.get(url)
+    return data.content
+
+
+def video_demo():
+    year = 2017
+    month = 9
+    date = 11
+    for time in range(0, 2400, 100):
+        for offset in [0, 15, 30, 45]:
+            get_frame(year, month, date, time + offset)
+            open('/tmp/weather.mjpg', 'a').write(data.content)
+    os.system('ffplay /tmp/weather.mjpg')
+
+
+if __name__ == '__main__':
+    img = get_latest_frame()
+    open('/tmp/weather.jpg', 'w').write(img)
+    os.system('imgcat /tmp/weather.jpg')
