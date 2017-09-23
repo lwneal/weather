@@ -12,7 +12,6 @@ GET_LATEST_URL = 'https://www.nrlmry.navy.mil/nexsat-bin/nexsat.cgi?BASIN=CONUS&
 def get_frame(year, month, date, time):
     date_code = '{:04d}{:02d}{:02d}.{:04d}'.format(year, month, date, time)
     url = URL_PREFIX + date_code + URL_SUFFIX
-    print(url)
     data = requests.get(url)
     return data.content
 
@@ -21,7 +20,6 @@ def get_latest_frame():
     front_page_html = requests.get(GET_LATEST_URL).text
     latest_url_key = front_page_html.partition(URL_SPLIT)[2][:13]
     url = URL_PREFIX + latest_url_key + URL_SUFFIX
-    print(url)
     data = requests.get(url)
     return data.content
 
